@@ -1,7 +1,8 @@
 import './App.css';
 import React from 'react'
 import { useEffect, useState } from 'react';
-import { SigningStargateClient } from "@cosmjs/stargate";
+import { SigningStargateClient, MsgExecuteContract } from "@cosmjs/stargate";
+// import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 
 export const BLOCKSPACERACE_PARAMS = {
   chainId: 'blockspacerace',
@@ -94,6 +95,20 @@ function App() {
   function handleSubmit(e) {
     e.preventDefault();
     console.log('submit ' + submitNamespace + ', ' + submitData);
+
+    const namespaceId = encodeDataToHex(retrieveNamespace);
+    const data = encodeDataToHex(submitData);
+
+    const tx = new MsgExecuteContract (
+      account,
+      namespaceId,
+      {
+        submit_pfb: {
+          data: data,
+        },
+      },
+      []
+    );
   }
 
   async function handleRetrieve(e) {
