@@ -25,7 +25,7 @@ submitForm.addEventListener('submit', async (event) => {
   const namespaceId = encodeDataToHex(event.target.elements['namespace-id'].value);
   const data = encodeDataToHex(event.target.elements['data'].value);
 
-  const response = await postData('http://localhost:8000/api/submit_pfb', {
+  const response = await postData('http://celestia-rpc.openbitlab.com:8080/submit_pfb', {
     namespace_id: namespaceId,
     data: data,
     gas_limit: 80000,
@@ -39,12 +39,12 @@ submitForm.addEventListener('submit', async (event) => {
 const retrieveForm = document.getElementById('retrieve-form');
 retrieveForm.addEventListener('submit', async (event) => {
   event.preventDefault();
-  const namespaceId = encodeDataToHex(event.target.elements['retrieve-namespace-id'].value);
+  const namespaceId = event.target.elements['retrieve-namespace-id'].value;
   const blockheight = event.target.elements['blockheight'].value;
 
-  const url = `http://localhost:8000/api/namespaced_shares/${namespaceId}/height/${blockheight}`;
+  const url = `http://celestia-rpc.openbitlab.com:8080/namespaced_shares/${namespaceId}/height/${blockheight}`;
   const result = await getData(url);
 
   const resultElement = document.getElementById('result');
-  resultElement.textContent = JSON.stringify(result, null, 2);
+  resultElement.textContent = JSON.stringify(atob(result["shares"][0].split("AAAA")[1]), null, 2);
 });
