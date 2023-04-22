@@ -1,3 +1,18 @@
+async function fetchWithTimeout(resource, options = {}) {
+  const { timeout = 8000 } = options;
+  
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  const response = await fetch(resource, {
+    ...options,
+    signal: controller.signal  
+  });
+  clearTimeout(id);
+
+  return response;
+}
+
 function postData(url = '', data = {}) {
   console.log(data);
   return fetch(url, {
@@ -11,7 +26,9 @@ function postData(url = '', data = {}) {
 }
 
 function getData(url = '') {
-  return fetch(url).then((response) => response.json());
+    return fetchWithTimeout(url, {
+     	 timeout: 6000
+    }).then((response) => response.json());
 }
 
 function encodeDataToHex(data) {
@@ -34,7 +51,11 @@ submitForm.addEventListener('submit', async (event) => {
   });
 
   const blockheight = response.height;
-  alert(`Inserted on block ${blockheight}`);
+  if (response.status == 200) {
+	alert(`Inserted on block ${blockheight}`);
+  } else {
+	alert("There was an error!");
+  }
 });
 
 const retrieveForm = document.getElementById('retrieve-form');
@@ -44,8 +65,12 @@ retrieveForm.addEventListener('submit', async (event) => {
   const blockheight = event.target.elements['blockheight'].value;
 
   const url = `http://celestia-rpc.openbitlab.com:80/api/namespaced_shares/${namespaceId}/height/${blockheight}`;
-  const result = await getData(url);
+  try {
+	const result = await getData(url);
 
-  const resultElement = document.getElementById('result');
-  resultElement.textContent = JSON.stringify(atob(result["shares"][0].split("AAAA")[1]), null, 2);
+  	const resultElement = document.getElementById('result');
+  	resultElement.textContent = JSON.stringify(atob(result["shares"][0].split("AAAA")[1]).replace(/^./, ""), null, 2);
+  } catch {
+	alert("There was an error!");
+  }
 });
