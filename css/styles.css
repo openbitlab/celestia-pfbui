@@ -1,0 +1,16 @@
+body {
+    background-image: url('../images/img.png');
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    font-family: "ruberoidlight", sans-serif;
+    font-family: "ruberoidmedium", sans-serif;
+    font-family: "ruberoid_regularregular", sans-serif;
+    font-family: "ruberoidsemi_bold", sans-serif;
+    font-family: "ruberoid_boldbold", sans-serif;
+}
+
+.hide {
+    display: none;
+}
