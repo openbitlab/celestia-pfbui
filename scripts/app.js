@@ -1,7 +1,7 @@
 const URL = 'http://celestia-rpc.openbitlab.com/api';
 
 async function fetchWithTimeout(resource, options = {}) {
-  const { timeout = 1000 } = options;
+  const { timeout = 3000 } = options;
   
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
@@ -28,7 +28,7 @@ function postData(url = '', data = {}) {
 
 function getData(url = '') {
     return fetchWithTimeout(url, {
-     	 timeout: 1000
+     	 timeout: 3000
     }).then((response) => response.json());
 }
 
@@ -41,12 +41,14 @@ function encodeDataToHex(data) {
 const submitForm = document.getElementById('submit-form');
 submitForm.addEventListener('submit', async (event) => {
   event.preventDefault();
-  const submitButton = document.getElementById("spinnerSubmit");
+  const submitSpinner = document.getElementById("spinnerSubmit");
+  const submitButton = document.getElementById("submitButton");
+  submitButton.disabled = true;
   const submitText = document.getElementById("submitMessage");
-  submitButton.classList.remove("hide");
+  submitSpinner.classList.remove("hide");
   submitText.classList.add("hide");
   const namespaceId = event.target.elements['namespace-id'].value;
-  const data = encodeDataToHex(event.target.elements['data'].value);
+  const data = event.target.elements['data'].value;
 
   const response = await postData(`${URL}/submit_pfb`, {
     namespace_id: namespaceId,
@@ -65,16 +67,19 @@ submitForm.addEventListener('submit', async (event) => {
     var myModal = new bootstrap.Modal(document.getElementById("modalFail"), {});
     myModal.show();
   }
-  submitButton.classList.add("hide");
+  submitSpinner.classList.add("hide");
   submitText.classList.remove("hide");
+  submitButton.disabled = false;
 });
 
 const retrieveForm = document.getElementById('retrieve-form');
 retrieveForm.addEventListener('submit', async (event) => {
   event.preventDefault();
-  const retrieveButton = document.getElementById("spinnerRetrieve");
+  const retrieveSpinner = document.getElementById("spinnerRetrieve");
+  const retrieveButton = document.getElementById("retrieveButton");
+  retrieveButton.disabled = true;
   const retrieveText = document.getElementById("retrieveMessage");
-  retrieveButton.classList.remove("hide");
+  retrieveSpinner.classList.remove("hide");
   retrieveText.classList.add("hide");
   const namespaceId = event.target.elements['retrieve-namespace-id'].value;
   const blockheight = event.target.elements['blockheight'].value;
@@ -85,9 +90,11 @@ retrieveForm.addEventListener('submit', async (event) => {
     const urlGetTime = `${URL}/header/${blockheight}`
 	  const resultTime = await getData(urlGetTime);
 
+    const decodeButtonElement = document.getElementById('decodeButton');
+    decodeButtonElement.classList.remove('hide');
   	const resultElement = document.getElementById('result');
   	const resultTimeElement = document.getElementById('inserted-time');
-  	resultElement.textContent = atob(result["shares"][0].split("AAAA")[1]).replace(/^./, "");
+  	resultElement.textContent = result["shares"][0];
   	const date = new Date(resultTime["header"]["time"]);
     resultTimeElement.textContent = `${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
 
@@ -97,8 +104,9 @@ retrieveForm.addEventListener('submit', async (event) => {
     var myModal = new bootstrap.Modal(document.getElementById("modalFail"), {});
     myModal.show();
   }
-  retrieveButton.classList.add("hide");
+  retrieveSpinner.classList.add("hide");
   retrieveText.classList.remove("hide");
+  retrieveButton.disabled = false;
 });
 
 function closeModalFail() {
@@ -111,6 +119,38 @@ function closeModalSuccess() {
   var myModalEl = document.getElementById('modalSuccess');
   var modal = bootstrap.Modal.getInstance(myModalEl)
   modal.hide();
+}
+
+function showEncodeButton() {
+  const buttonEncodeElement = document.getElementById('button-encode');
+  buttonEncodeElement.classList.remove('hide');
+}
+
+function hexEncodeData() {
+  const dataElement = document.getElementById('data');
+  dataElement.value = encodeDataToHex(dataElement.value);
+  const buttonEncodeElement = document.getElementById('button-encode');
+  buttonEncodeElement.classList.add('hide');
+}
+
+function getRandomNamespaceId() { 
+  let id = "";
+  for(let i = 0; i < 16; i++) {
+    id += Math.floor(Math.random() * 15).toString(16);
+  }
+  const idElement = document.getElementById('namespace-id');
+  idElement.value = id;
+}
+
+function decodeBlob() {
+  try {
+    const resultElement = document.getElementById('result');
+    resultElement.textContent = atob(resultElement.textContent.split("AAAA")[1]).replace(/^./, "");
+    const decodeButtonElement = document.getElementById('decodeButton');
+    decodeButtonElement.classList.add('hide');
+  } catch {
+    console.log("Not a valid base64 string!")
+  }
 }
 
 window.onload = async function() {

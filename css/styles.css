@@ -14,3 +14,7 @@ body {
 .hide {
     display: none;
 }
+
+.resultBlob {
+    font-size: 75%;
+}
