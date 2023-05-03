@@ -1,1 +1,1 @@
-# celestia-pfbui
+`npm install && npm start`
